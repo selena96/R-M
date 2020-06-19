@@ -98,8 +98,8 @@ class NgramModel(nn.Module):
     def __init__(self, vocab_size, embedding_size):
         super().__init__()
 
-        self.embedding = nn.Embedding(vocab_size, embedding_size)
-        self.out = nn.Linear(vocab_size, embedding_size)
+        self.embedding = nn.Linear(vocab_size, embedding_size)
+        self.out = nn.Linear(embedding_size, vocab_size)
         
         # Not sure whether I need next line
         #self.out.weight = self.embedding.weight
@@ -107,9 +107,8 @@ class NgramModel(nn.Module):
     def forward(self, x): # <- This function actually runs the model
 
         emb = self.embedding(x)
-
         # Sigmoid is already in criterion so it is not needed here
-        print("blah1")
+        logits = self.out(emb)
 
         return logits
 
