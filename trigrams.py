@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
 import sys
+#import ipdb
 
 import torch
 import torch.nn as nn
 
+#ipdb.set_trace()
 
 def read_data(file_name): # this function reads data and adds ## in front and end of each verb
     cols=['present_phon','past_phon']
@@ -97,16 +99,17 @@ class NgramModel(nn.Module):
         super().__init__()
 
         self.embedding = nn.Embedding(vocab_size, embedding_size)
-        self.out = nn.Linear(embedding_size, vocab_size)
+        self.out = nn.Linear(vocab_size, embedding_size)
         
         # Not sure whether I need next line
         #self.out.weight = self.embedding.weight
 
     def forward(self, x): # <- This function actually runs the model
+
         emb = self.embedding(x)
 
-        # Sigmoid is built in criterion so it is not needed here
-        logits = self.out(emb)
+        # Sigmoid is already in criterion so it is not needed here
+        print("blah1")
 
         return logits
 
@@ -116,9 +119,11 @@ inputs = torch.tensor(X1)
 targets = torch.tensor(Y1)
 
 dataset = torch.utils.data.TensorDataset(inputs, targets) 
-loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=True) # batches and shuffles data
+loader = torch.utils.data.DataLoader(dataset, batch_size=3, shuffle=True) # batches and shuffles data
 
-model = NgramModel(len(X1), 300)
+#print(len(X1))
+#print(len(X1[1]))
+model = NgramModel(len(X1[1]), 300)
 
 learning_rate = 1e-4
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -137,7 +142,7 @@ for epoch in range(3):
 
         pos_weight = torch.ones([64])
         criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-        loss = criterion(log_probs, targets)
+        loss = criterion(log_probs, labels)
 
         loss.backward() 
         optimizer.step()
@@ -149,7 +154,7 @@ for epoch in range(3):
             running_loss = 0.0
         
         losses.append(running_loss)
-        
+
 print('Finished Training')
 print('Losses: ')
 print(losses)
